@@ -24,6 +24,7 @@
     <Teleport to="body">
       <ModalComponent>
         <div class="flex flex-col gap-4 justify-center items-center">
+          <h2>Введите измененный вариант</h2>
           <InputComponent v-model="currentTask" placeholder="Введите новое значение задачи" />
           <BtnComponent @click="saveEdit">Изменить</BtnComponent>
         </div>
@@ -103,7 +104,7 @@ const filteredTasks = computed(() => {
   width: 100%;
   margin: 0 auto;
   transition: box-shadow 0.3s ease;
-  flex-wrap: wrap; 
+  flex-wrap: wrap;
   gap: 12px;
 
   &:hover {
