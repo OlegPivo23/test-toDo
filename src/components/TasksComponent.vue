@@ -1,5 +1,23 @@
 <template>
   <div class="task">
+    <div class="filter-buttons">
+      <BtnComponent @click="filter = 'all'" :type="filter === 'all' ? 'primary' : 'secondary'">
+        Все
+      </BtnComponent>
+      <BtnComponent
+        @click="filter = 'completed'"
+        :type="filter === 'completed' ? 'primary' : 'secondary'"
+      >
+        Выполненные
+      </BtnComponent>
+      <BtnComponent
+        @click="filter = 'incomplete'"
+        :type="filter === 'incomplete' ? 'primary' : 'secondary'"
+      >
+        Не выполненные
+      </BtnComponent>
+    </div>
+
     <div v-if="!filteredTasks.length && searchQuery.trim()">
       <h2 class="text-2xl text-center text-gray-500">Ничего не найдено</h2>
     </div>
@@ -7,7 +25,12 @@
       <h1 class="text-3xl text-center text-blue-600">Добавьте задачу</h1>
     </div>
     <div v-else class="task-list">
-      <div v-for="task in filteredTasks" :key="task.id" class="task-wrapper">
+      <div
+        v-for="task in filteredTasks"
+        :key="task.id"
+        class="task-wrapper"
+        :class="{ completed: task.isCompleted }"
+      >
         <p>{{ task.value }}</p>
         <div class="btn-wrapper">
           <BtnComponent
@@ -18,6 +41,11 @@
           >
             {{ btn.text }}
           </BtnComponent>
+          <BtnComponent
+            text="Выполнено"
+            :type="task.isCompleted ? 'success' : 'secondary'"
+            @click="toggleTaskCompletion(task.id)"
+          />
         </div>
       </div>
     </div>
@@ -36,7 +64,7 @@
 <script setup>
 import { computed, defineProps, ref } from 'vue'
 import BtnComponent from './UI/BtnComponent.vue'
-import { removeTask, getTasks } from '@/composebles/useTask'
+import { removeTask, getTasks, toggleTaskCompletion } from '@/composebles/useTask'
 import ModalComponent from './modal/ModalComponent.vue'
 import { useTaskModal } from '@/composebles/useTaskModal'
 import InputComponent from './UI/InputComponent.vue'
@@ -60,15 +88,25 @@ const props = defineProps({
   searchQuery: String,
 })
 
+const filter = ref('all') 
 const tasks = getTasks()
 
 const filteredTasks = computed(() => {
-  if (!props.searchQuery.trim()) {
-    return tasks.value
+  let filtered = tasks.value
+
+  if (props.searchQuery.trim()) {
+    filtered = filtered.filter((task) =>
+      task.value.toLowerCase().includes(props.searchQuery.toLowerCase()),
+    )
   }
-  return tasks.value.filter((task) =>
-    task.value.toLowerCase().includes(props.searchQuery.toLowerCase()),
-  )
+
+  if (filter.value === 'completed') {
+    filtered = filtered.filter((task) => task.isCompleted)
+  } else if (filter.value === 'incomplete') {
+    filtered = filtered.filter((task) => !task.isCompleted)
+  }
+
+  return filtered
 })
 </script>
 
@@ -77,6 +115,13 @@ const filteredTasks = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 20px;
 }
 
 .empty-tasks {
@@ -106,6 +151,12 @@ const filteredTasks = computed(() => {
   transition: box-shadow 0.3s ease;
   flex-wrap: wrap;
   gap: 12px;
+
+  &.completed {
+    background-color: #d4edda;
+    color: #155724;
+    text-decoration: line-through;
+  }
 
   &:hover {
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);

@@ -11,7 +11,7 @@ export function getTasks() {
 
 // Добавление задачи
 export function addTask(value) {
-  const task = { id: Date.now(), value }
+  const task = { id: Date.now(), value, isCompleted: false }
   tasks.value.push(task)
   localStorage.setItem('tasks', JSON.stringify(tasks.value))
 }
@@ -27,6 +27,15 @@ export function updateTask(taskId, newValue) {
   const task = tasks.value.find((task) => task.id === taskId)
   if (task) {
     task.value = newValue
+    localStorage.setItem('tasks', JSON.stringify(tasks.value))
+  }
+}
+
+// Переключение состояния выполнения задачи
+export function toggleTaskCompletion(taskId) {
+  const task = tasks.value.find((task) => task.id === taskId)
+  if (task) {
+    task.isCompleted = !task.isCompleted
     localStorage.setItem('tasks', JSON.stringify(tasks.value))
   }
 }
